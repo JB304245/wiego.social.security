@@ -7,6 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "jonathan.belke314@gmail.com")
 Description: Shiny application housing a cost calculator for social security subsidies.
+URL: https://github.com/JB304245/wiego.social.security
 License: What license is it under?
 Imports: 
     config (>= 0.3.2),
