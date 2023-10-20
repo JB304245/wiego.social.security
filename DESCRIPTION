@@ -1,0 +1,23 @@
+Package: wiego.social.security
+Title: Social security cost calculator
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Jonathan",
+           family = "Belke",
+           role = c("aut", "cre"),
+           email = "jonathan.belke314@gmail.com")
+Description: Shiny application housing a cost calculator for social security subsidies.
+License: What license is it under?
+Imports: 
+    config (>= 0.3.2),
+    data.table,
+    dplyr,
+    ggplot2,
+    glue,
+    lubridate,
+    golem (>= 0.4.1),
+    shiny (>= 1.7.2),
+    magrittr
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.1
