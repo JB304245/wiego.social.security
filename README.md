@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-Social security subsidy cost modelling
+Shiny app interface for social security subsidy cost modelling
 
 ## Installation
 

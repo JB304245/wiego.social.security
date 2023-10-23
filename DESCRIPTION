@@ -23,10 +23,12 @@ Imports:
     rlang,
     lifecycle,
     cli,
-    withr
+    withr,
+    pkgload
 Suggests:
     janitor,
-    rdbnomics
+    rdbnomics,
+    stringi
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.1

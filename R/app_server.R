@@ -7,14 +7,33 @@
 app_server <- function(input, output, session) {
   # Your application server logic
 
+  shiny::observe({
+
+    new_val = input$num_years
+   shiny::updateSliderInput(session,
+                            inputId = "year_start_decrease",
+                            value = new_val)
+  })
+
+
+    country_data = shiny::reactive({
+
+      out = list(population = DT_population[reference_area == input$country, population],
+                 population_growth = DT_population_growth[reference_area == input$country, population_growth])
+
+      out
+
+    })
 
 
     model_table = shiny::reactive({
 
-      population = input$current_population * 1000000
+      # population = input$current_population * 1000000
+      population = country_data()$population
+      population_growth = country_data()$population_growth
 
       DT_workforce = model_population_and_workforce(current_population = population,
-                                                    pop_growth_current = input$pop_growth,
+                                                    pop_growth_current = population_growth,
                                                     percent_working_age = input$percent_working_age,
                                                     workforce_participation_rate = input$percent_workforce_participation,
                                                     informal_percent_current = input$percent_informal,
@@ -26,12 +45,19 @@ app_server <- function(input, output, session) {
 
 
       DT_workforce[, percent_informal_workers_signed_up_to_social_security := participation_rate_initial + participation_rate_increase_yearly * year]
+      DT_workforce[, percent_informal_workers_signed_up_to_social_security := pmin(percent_informal_workers_signed_up_to_social_security, 1.0)]
+
+      DT_workforce[, government_share := calculate_government_share(input$ss_government_share,
+                                                                    period_in_years = input$num_years,
+                                                                    start_decrease_after_x_years = input$year_start_decrease)]
+
+      DT_workforce[, worker_share := 1 - government_share]
 
 
       DT_workforce[, government_cost_usd := model_cost(num_informal_workers = workforce_informal,
                                                        participation_rate = percent_informal_workers_signed_up_to_social_security,
                                                        minimum_contribution_monthly_usd = input$ss_min_contribution,
-                                                       government_share = input$ss_government_share)]
+                                                       government_share = government_share)]
 
       DT_workforce[, num_informal_workers_signed_up_to_social_security := workforce_informal * percent_informal_workers_signed_up_to_social_security]
 
@@ -92,7 +118,7 @@ app_server <- function(input, output, session) {
 
     })
 
-    output$totals = shiny::renderDataTable({
+    output$totals = shiny::renderTable({
 
       DT = model_table()
 
@@ -110,6 +136,39 @@ app_server <- function(input, output, session) {
       #                   Total cost adjusted for inflation: {total_cost_inflation_adjusted}")
 
       out_DT
+
+    })
+
+
+    output$totals_per_worker = shiny::renderPlot({
+
+      DT = model_table()
+
+      total_cost_per_worker_for_worker = sum(DT$worker_share * input$ss_min_contribution * 12)
+      total_cost_per_worker_for_government = sum(DT$government_share * input$ss_min_contribution * 12)
+      total_amount_to_ss_per_worker = sum(nrow(DT) * 12 * input$ss_min_contribution)
+
+      out_DT = data.table(comment = c('Total cost for worker',
+                                      'Total cost for government',
+                                      'Total going to social security'),
+                          amount = c(total_cost_per_worker_for_worker,
+                                     total_cost_per_worker_for_government,
+                                     total_amount_to_ss_per_worker))
+
+      out_DT %>%
+        ggplot2::ggplot(ggplot2::aes(x=comment, y=amount, fill = comment)) +
+        geom_col() +
+        scale_y_continuous(labels = scales::dollar) +
+        scale_x_discrete(labels = NULL) +
+        labs(title = "Total cost per worker for the given time frame",
+             subtitle = "(number of years * 12 * monthly share)",
+             y = "Amount",
+             x = "")
+
+      # out_DT$amount = scales::dollar(out_DT$amount)
+      #
+      #
+      # out_DT
 
     })
 
