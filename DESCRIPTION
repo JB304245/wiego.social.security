@@ -8,7 +8,7 @@ Authors@R:
            email = "jonathan.belke314@gmail.com")
 Description: Shiny application housing a cost calculator for social security subsidies.
 URL: https://github.com/JB304245/wiego.social.security
-License: What license is it under?
+License: MIT + file LICENSE
 Imports: 
     config (>= 0.3.2),
     data.table,

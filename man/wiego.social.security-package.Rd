@@ -8,6 +8,13 @@
 \description{
 Shiny application housing a cost calculator for social security subsidies.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/JB304245/wiego.social.security}
+}
+
+}
 \author{
 \strong{Maintainer}: Jonathan Belke \email{jonathan.belke314@gmail.com}
 
