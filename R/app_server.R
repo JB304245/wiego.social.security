@@ -14,11 +14,13 @@ app_server <- function(input, output, session) {
 
     country_data = shiny::reactive({
 
-      out = list(population = DT_country_data[country == input$country, population],
-                 population_growth_percent = DT_country_data[country == input$country, population_growth_percent],
-                 inflation_percent = DT_country_data[country == input$country, inflation_percent],
-                 labor_force_participation_percent = DT_country_data[country == input$country, labor_force_participation_percent],
-                 working_age_percent = DT_country_data[country == input$country, working_age_percent])
+      # out = list(population = DT_country_data[country == input$country, population],
+      #            population_growth_percent = DT_country_data[country == input$country, population_growth_percent],
+      #            inflation_percent = DT_country_data[country == input$country, inflation_percent],
+      #            labor_force_participation_percent = DT_country_data[country == input$country, labor_force_participation_percent],
+      #            working_age_percent = DT_country_data[country == input$country, working_age_percent])
+
+      out = as.list(DT_country_data[country == input$country])
 
       out
 
@@ -136,6 +138,18 @@ app_server <- function(input, output, session) {
 
       DT
 
+
+    output$country_data_table = shiny::renderTable({
+
+      country_data = country_data()
+
+      df = data.frame(name = names(country_data),
+                      value = unname(unlist(country_data)))
+
+      df
+
+
+    })
 
 
     })

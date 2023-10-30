@@ -49,6 +49,7 @@ app_ui <- function(request) {
           shiny::plotOutput('totals_per_worker'),
           shiny::dataTableOutput(outputId = 'model_table'),
           shiny::tableOutput('totals'),
+          shiny::tableOutput("country_data_table"),
           shiny::h3("Comments:"),
           shiny::h4("Population growth, workforce participation, inflation and so on are kept constant throughout the simulation."),
           shiny::h4("It is assumed that informal workers will contribute the minimum and the government will match that according to the government share"),

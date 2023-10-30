@@ -78,6 +78,10 @@ DT_country_data[DT_expenses,
 
 # Store -------------------------------------------------------------------
 
+DT_country_data[, c("date", "unit", "obs_status",
+                    "footnote", "last_updated") := NULL]
+
+
 usethis::use_data(DT_country_data, overwrite = TRUE)
 
 
