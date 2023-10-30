@@ -7,36 +7,78 @@
 app_server <- function(input, output, session) {
   # Your application server logic
 
-  shiny::observe({
 
-    new_val = input$num_years
-   shiny::updateSliderInput(session,
-                            inputId = "year_start_decrease",
-                            value = new_val)
-  })
+
+# Assemble country data ---------------------------------------------------
 
 
     country_data = shiny::reactive({
 
-      out = list(population = DT_population[reference_area == input$country, population],
-                 population_growth = DT_population_growth[reference_area == input$country, population_growth])
+      out = list(population = DT_country_data[country == input$country, population],
+                 population_growth_percent = DT_country_data[country == input$country, population_growth_percent],
+                 inflation_percent = DT_country_data[country == input$country, inflation_percent],
+                 labor_force_participation_percent = DT_country_data[country == input$country, labor_force_participation_percent],
+                 working_age_percent = DT_country_data[country == input$country, working_age_percent])
 
       out
 
     })
+
+# Update inputs -----------------------------------------------------------
+
+
+
+    shiny::observe({
+
+      new_val = input$num_years
+      shiny::updateSliderInput(session,
+                               inputId = "year_start_decrease",
+                               value = new_val)
+    })
+
+
+    shiny::observe({
+
+      new_val = round(country_data()$inflation_percent)
+
+      shiny::updateSliderInput(session,
+                               inputId ='inflation_rate',
+                               value = new_val)
+
+      shiny::updateSliderInput(session,
+                               inputId ='percent_workforce_participation',
+                               value = round(country_data()$labor_force_participation_percent))
+
+      shiny::updateSliderInput(session,
+                               inputId ='percent_working_age',
+                               value = round(country_data()$working_age_percent))
+
+    })
+
+
+
+# Model table -------------------------------------------------------------
 
 
     model_table = shiny::reactive({
 
       # population = input$current_population * 1000000
       population = country_data()$population
-      population_growth = country_data()$population_growth
+      population_growth = country_data()$population_growth / 100
+
+      workforce_participation_rate = input$percent_workforce_participation / 100
+
+      percent_working_age = input$percent_working_age / 100
+
+      informal_percent_current = input$percent_informal / 100
+
+
 
       DT_workforce = model_population_and_workforce(current_population = population,
                                                     pop_growth_current = population_growth,
-                                                    percent_working_age = input$percent_working_age,
-                                                    workforce_participation_rate = input$percent_workforce_participation,
-                                                    informal_percent_current = input$percent_informal,
+                                                    percent_working_age = percent_working_age,
+                                                    workforce_participation_rate = workforce_participation_rate,
+                                                    informal_percent_current = informal_percent_current,
                                                     period_in_years = input$num_years)
 
 
@@ -62,7 +104,7 @@ app_server <- function(input, output, session) {
       DT_workforce[, num_informal_workers_signed_up_to_social_security := workforce_informal * percent_informal_workers_signed_up_to_social_security]
 
 
-      inflation_rate = input$inflation_rate
+      inflation_rate = input$inflation_rate / 100
 
       DT_workforce[, inflation_factor := (1 + inflation_rate) ^ year]
 

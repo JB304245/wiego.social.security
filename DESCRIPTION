@@ -26,9 +26,12 @@ Imports:
     withr,
     pkgload
 Suggests:
+    countrycode,
+    httr,
     janitor,
     rdbnomics,
-    stringi
+    stringi,
+    wbstats
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.1

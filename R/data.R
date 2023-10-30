@@ -1,31 +1,15 @@
-#' ILO population data
-#'
-#' Population data by country
+#' World Bank country level data
 #'
 #' @format ## `who`
 #' A data.table
 #' \describe{
-#'   \item{ref_area}{ISO country codes}
-#'   \item{reference_area}{Country names}
-#'   \item{population}{Population}
-#'   \item{year}{Year}
+#'   \item{iso3c}{ISO country codes}
+#'   \item{country }{Country names}
+#'   \item{population}{population}
+#'   \item{population_growth_percent}{population growth percent}
+#'   \item{labor_force_participation_percent}{Percentage of working age people (15-64) who work}
+#'   \item{working_age_percent}{percetange of the population which is in working age (15-64)}
 #'   ...
 #' }
-#' @source https://db.nomics.world/ ILO
-"DT_population"
-
-#' ILO population growth data
-#'
-#' Population growth data by country
-#'
-#' @format ## `who`
-#' A data.table
-#' \describe{
-#'   \item{ref_area}{ISO country codes}
-#'   \item{reference_area}{Country names}
-#'   \item{population_growth}{Population growth for the given year}
-#'   \item{year}{Year}
-#'   ...
-#' }
-#' @source https://db.nomics.world/ ILO
-"DT_population_growth"
+#' @source World bank indicator API
+"DT_country_data"
