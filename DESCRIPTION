@@ -29,7 +29,6 @@ Suggests:
     countrycode,
     httr,
     janitor,
-    rdbnomics,
     stringi,
     wbstats
 Encoding: UTF-8

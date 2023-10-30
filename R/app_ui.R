@@ -18,6 +18,8 @@ app_ui <- function(request) {
       sidebarLayout(
         sidebarPanel(
           shiny::selectInput("country", "Country", choices = DT_country_data$country),
+          shiny::hr(),
+          shiny::h4("Model control"),
           sliderInput("num_years", "Number of years to simulate",
                       min = 1, max = 20, value = 10, step = 1),
           sliderInput("ss_min_contribution", "Monthly minimum contribution total (Worker + Government share), USD",
@@ -34,6 +36,8 @@ app_ui <- function(request) {
           #             min = 1, max = 250, value = 57),
           # sliderInput("pop_growth", "Population growth rate",
           #             min = 0, max = 0.03, value = 0.02, step = 0.0025),
+          shiny::hr(),
+          shiny::h4("Economic data"),
           sliderInput("percent_working_age", "Working age (%)",
                       min = 40, max = 80, value = 60, step = 1),
           sliderInput("percent_workforce_participation", "Workforce participation rate (%)",

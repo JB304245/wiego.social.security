@@ -138,6 +138,8 @@ app_server <- function(input, output, session) {
 
       DT
 
+    })
+
 
     output$country_data_table = shiny::renderTable({
 
@@ -147,9 +149,6 @@ app_server <- function(input, output, session) {
                       value = unname(unlist(country_data)))
 
       df
-
-
-    })
 
 
     })
