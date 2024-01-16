@@ -110,7 +110,7 @@ app_server <- function(input, output, session) {
       DT_workforce[, government_cost_pct_of_spending := government_cost_usd_inflation_adjusted / government_spending]
 
       # For display later
-      DT_workforce[, year_date := lubridate::as_date(paste0(year, "-01-01"))]
+      DT_workforce[, year_date := lubridate::as_date(paste0(year + lubridate::year(Sys.Date()), "-01-01"))]
 
       DT_workforce
 
