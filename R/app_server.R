@@ -2,23 +2,14 @@
 #'
 #' @param input,output,session Internal parameters for {shiny}.
 #'     DO NOT REMOVE.
-#' @import shiny ggplot2 data.table
+#' @import shiny ggplot2 data.table forcats
 #' @noRd
 app_server <- function(input, output, session) {
-  # Your application server logic
-
-
 
 # Assemble country data ---------------------------------------------------
 
 
     country_data = shiny::reactive({
-
-      # out = list(population = DT_country_data[country == input$country, population],
-      #            population_growth_percent = DT_country_data[country == input$country, population_growth_percent],
-      #            inflation_percent = DT_country_data[country == input$country, inflation_percent],
-      #            labor_force_participation_percent = DT_country_data[country == input$country, labor_force_participation_percent],
-      #            working_age_percent = DT_country_data[country == input$country, working_age_percent])
 
       out = as.list(DT_country_data[country == input$country])
 
@@ -42,6 +33,7 @@ app_server <- function(input, output, session) {
     shiny::observe({
 
       new_val = round(country_data()$inflation_percent)
+      if(is.na(new_val)) new_val = 2
 
       shiny::updateSliderInput(session,
                                inputId ='inflation_rate',
@@ -64,14 +56,11 @@ app_server <- function(input, output, session) {
 
     model_table = shiny::reactive({
 
-      # population = input$current_population * 1000000
       population = country_data()$population
+
       population_growth = country_data()$population_growth / 100
-
       workforce_participation_rate = input$percent_workforce_participation / 100
-
       percent_working_age = input$percent_working_age / 100
-
       informal_percent_current = input$percent_informal / 100
 
 
@@ -82,6 +71,13 @@ app_server <- function(input, output, session) {
                                                     workforce_participation_rate = workforce_participation_rate,
                                                     informal_percent_current = informal_percent_current,
                                                     period_in_years = input$num_years)
+      gdp = as.numeric(country_data()$gdp)
+      government_expenses_pct_of_gdp = as.numeric(country_data()$government_expenses_pct_of_gdp)
+      current_spending = gdp * government_expenses_pct_of_gdp / 100
+
+      DT_workforce[, government_spending := model_government_expenditure(num_years = input$num_years+1,
+                                                                         initial_expenditure = current_spending,
+                                                                         inflation = input$inflation_rate / 100)]
 
 
       participation_rate_initial = input$participation_rate_in_ss
@@ -110,7 +106,11 @@ app_server <- function(input, output, session) {
 
       DT_workforce[, inflation_factor := (1 + inflation_rate) ^ year]
 
-      DT_workforce[, goverment_cost_usd_inflation_adjusted := government_cost_usd * inflation_factor]
+      DT_workforce[, government_cost_usd_inflation_adjusted := government_cost_usd * inflation_factor]
+      DT_workforce[, government_cost_pct_of_spending := government_cost_usd_inflation_adjusted / government_spending]
+
+      # For display later
+      DT_workforce[, year_date := lubridate::as_date(paste0(year, "-01-01"))]
 
       DT_workforce
 
@@ -128,13 +128,13 @@ app_server <- function(input, output, session) {
                   workforce_informal = round(workforce_informal),
                   num_signed_up_for_ss = round(num_informal_workers_signed_up_to_social_security),
                   government_cost_usd = round(government_cost_usd),
-                  goverment_cost_usd_inflation_adjusted = round(goverment_cost_usd_inflation_adjusted))]
+                  government_cost_usd_inflation_adjusted = round(government_cost_usd_inflation_adjusted))]
 
       DT[, population := scales::comma(population)]
       DT[, workforce_informal := scales::comma(workforce_informal)]
       DT[, num_signed_up_for_ss := scales::comma(num_signed_up_for_ss)]
       DT[, government_cost_usd := scales::dollar(government_cost_usd)]
-      DT[, goverment_cost_usd_inflation_adjusted := scales::dollar(goverment_cost_usd_inflation_adjusted)]
+      DT[, government_cost_usd_inflation_adjusted := scales::dollar(government_cost_usd_inflation_adjusted)]
 
       DT
 
@@ -157,10 +157,8 @@ app_server <- function(input, output, session) {
 
       DT = model_table()
 
-      DT[, year_date := lubridate::as_date(paste0(year, "-01-01"))]
-
       DT %>%
-        ggplot2::ggplot(ggplot2::aes(x = year_date, y = goverment_cost_usd_inflation_adjusted, group = 1)) +
+        ggplot2::ggplot(ggplot2::aes(x = year_date, y = government_cost_usd_inflation_adjusted, group = 1)) +
         ggplot2::geom_point() +
         ggplot2::geom_line() +
         ggplot2::scale_y_continuous(labels=scales::dollar) +
@@ -170,6 +168,23 @@ app_server <- function(input, output, session) {
              y = "Cost in $USD, inflation adjusted")
 
 
+    })
+
+
+    output$cost_plot_pct_of_spending = shiny::renderPlot({
+
+      DT = model_table()
+
+      DT %>%
+        ggplot2::ggplot(ggplot2::aes(x = year_date, y = government_cost_pct_of_spending, group = 1)) +
+        ggplot2::geom_point() +
+        ggplot2::geom_line() +
+        ggplot2::scale_y_continuous(labels=scales::percent) +
+        ggplot2::scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+        ggplot2::labs(title = "Yearly cost of subsidy as percentage of government spending",
+                      x = "Year",
+                      y = "Percentage of government spending")
+
 
     })
 
@@ -178,17 +193,12 @@ app_server <- function(input, output, session) {
       DT = model_table()
 
       total_cost = sum(DT$government_cost_usd)
-      total_cost_inflation_adjusted = sum(DT$goverment_cost_usd_inflation_adjusted)
+      total_cost_inflation_adjusted = sum(DT$government_cost_usd_inflation_adjusted)
 
       out_DT = data.table(comment = c('Total cost for period', 'Total cost adjusted for inflation'),
                           amount = c(total_cost, total_cost_inflation_adjusted))
 
       out_DT$amount = scales::dollar(out_DT$amount)
-
-
-
-      # out = glue::glue("Total cost for period: {total_cost} \n
-      #                   Total cost adjusted for inflation: {total_cost_inflation_adjusted}")
 
       out_DT
 
@@ -203,14 +213,20 @@ app_server <- function(input, output, session) {
       total_cost_per_worker_for_government = sum(DT$government_share * input$ss_min_contribution * 12)
       total_amount_to_ss_per_worker = sum(nrow(DT) * 12 * input$ss_min_contribution)
 
-      out_DT = data.table(comment = c('Total cost for worker',
-                                      'Total cost for government',
-                                      'Total going to social security'),
+      yearly_interest_gained = model_interest(rep(input$ss_min_contribution * 12, nrow(DT)), input$interest_rate / 100)
+
+      plot_DT = data.table(comment = c('Cost for worker',
+                                      'Cost for government',
+                                      'Interest gained from contributions',
+                                      'Total to social security'),
                           amount = c(total_cost_per_worker_for_worker,
                                      total_cost_per_worker_for_government,
-                                     total_amount_to_ss_per_worker))
+                                     sum(yearly_interest_gained),
+                                     total_amount_to_ss_per_worker + sum(yearly_interest_gained)))
 
-      out_DT %>%
+      plot_DT[, comment := forcats::fct_reorder(comment, 1:nrow(plot_DT))]
+
+      plot_DT %>%
         ggplot2::ggplot(ggplot2::aes(x=comment, y=amount, fill = comment)) +
         geom_col() +
         scale_y_continuous(labels = scales::dollar) +
@@ -219,11 +235,6 @@ app_server <- function(input, output, session) {
              subtitle = "(number of years * 12 * monthly share)",
              y = "Amount",
              x = "")
-
-      # out_DT$amount = scales::dollar(out_DT$amount)
-      #
-      #
-      # out_DT
 
     })
 

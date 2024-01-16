@@ -2,9 +2,12 @@
 
 export("%>%")
 export(model_cost)
+export(model_government_expenditure)
+export(model_interest)
 export(model_population_and_workforce)
 export(run_app)
 import(data.table)
+import(forcats)
 import(ggplot2)
 import(rlang)
 import(shiny)
