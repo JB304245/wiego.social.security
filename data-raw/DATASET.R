@@ -85,12 +85,6 @@ DT_country_data[, c("date", "unit", "obs_status",
 usethis::use_data(DT_country_data, overwrite = TRUE)
 
 
-# middle class ------------------------------------------------------------
-
-some_DT = get_recent_indicator("1.0.HCount.Mid10to50",
-                               "middle_class_head_count")
-
-
 # Tests -------------------------------------------------------------------
 
 

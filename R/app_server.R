@@ -159,8 +159,8 @@ app_server <- function(input, output, session) {
 
       DT %>%
         ggplot2::ggplot(ggplot2::aes(x = year_date, y = government_cost_usd_inflation_adjusted, group = 1)) +
-        ggplot2::geom_point() +
-        ggplot2::geom_line() +
+        ggplot2::geom_point(col = wiego_color("orange")) +
+        ggplot2::geom_line(col = wiego_color("orange")) +
         ggplot2::scale_y_continuous(labels=scales::dollar) +
         ggplot2::scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
         ggplot2::labs(title = "Yearly cost of subsidy",
@@ -177,8 +177,8 @@ app_server <- function(input, output, session) {
 
       DT %>%
         ggplot2::ggplot(ggplot2::aes(x = year_date, y = government_cost_pct_of_spending, group = 1)) +
-        ggplot2::geom_point() +
-        ggplot2::geom_line() +
+        ggplot2::geom_point(col = wiego_color("orange")) +
+        ggplot2::geom_line(col = wiego_color("orange")) +
         ggplot2::scale_y_continuous(labels=scales::percent) +
         ggplot2::scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
         ggplot2::labs(title = "Yearly cost of subsidy as percentage of government spending",
@@ -230,7 +230,9 @@ app_server <- function(input, output, session) {
         ggplot2::ggplot(ggplot2::aes(x=comment, y=amount, fill = comment)) +
         geom_col() +
         scale_y_continuous(labels = scales::dollar) +
-        scale_x_discrete(labels = NULL) +
+        scale_x_discrete() +
+        scale_fill_wiego(palette = "main") +
+        coord_flip() +
         labs(title = "Total cost per worker for the given time frame",
              subtitle = "(number of years * 12 * monthly share)",
              y = "Amount",

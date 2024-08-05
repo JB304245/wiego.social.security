@@ -11,10 +11,17 @@ app_ui <- function(request) {
     # Your application UI logic
     fluidPage(
 
+      tags$head(
+        tags$link(rel = "stylesheet", type = "text/css", href = "www/sliders.css")
+      ),
 
-      titlePanel("Social Security subsidy for informal workers cost calculator"),
-      shiny::h5("App maintainer: Jonathan Belke"),
 
+      shiny::column(width = 6,
+                    titlePanel("Social Security subsidy for informal workers cost calculator")),
+      shiny::column(width = 6, offset = 6,
+                    tags$img(src = "www/wiego_logo_main.jpg",
+                             height = "50%",
+                             width = "50%")),
       sidebarLayout(
         sidebarPanel(
           shiny::selectInput("country", "Country", choices = DT_country_data$country,
