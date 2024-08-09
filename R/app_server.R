@@ -157,6 +157,8 @@ app_server <- function(input, output, session) {
 
       DT = model_table()
 
+      text_size = 15
+
       DT %>%
         ggplot2::ggplot(ggplot2::aes(x = year_date, y = government_cost_usd_inflation_adjusted, group = 1)) +
         ggplot2::geom_point(col = wiego_color("orange")) +
@@ -165,7 +167,9 @@ app_server <- function(input, output, session) {
         ggplot2::scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
         ggplot2::labs(title = "Yearly cost of subsidy",
              x = "Year",
-             y = "Cost in $USD, inflation adjusted")
+             y = "Cost in $USD, inflation adjusted") +
+        ggplot2::theme(axis.text.x = element_text(size=text_size),
+                       axis.text.y = element_text(size=text_size))
 
 
     })
@@ -175,6 +179,8 @@ app_server <- function(input, output, session) {
 
       DT = model_table()
 
+      text_size = 15
+
       DT %>%
         ggplot2::ggplot(ggplot2::aes(x = year_date, y = government_cost_pct_of_spending, group = 1)) +
         ggplot2::geom_point(col = wiego_color("orange")) +
@@ -183,7 +189,9 @@ app_server <- function(input, output, session) {
         ggplot2::scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
         ggplot2::labs(title = "Yearly cost of subsidy as percentage of government spending",
                       x = "Year",
-                      y = "Percentage of government spending")
+                      y = "Percentage of government spending") +
+        ggplot2::theme(axis.text.x = element_text(size=text_size),
+                       axis.text.y = element_text(size=text_size))
 
 
     })
@@ -206,6 +214,8 @@ app_server <- function(input, output, session) {
 
 
     output$totals_per_worker = shiny::renderPlot({
+
+      text_size = 15
 
       DT = model_table()
 
@@ -236,7 +246,9 @@ app_server <- function(input, output, session) {
         labs(title = "Total cost per worker for the given time frame",
              subtitle = "(number of years * 12 * monthly share)",
              y = "Amount",
-             x = "")
+             x = "") +
+        ggplot2::theme(axis.text.x = element_text(size=text_size),
+                       axis.text.y = element_text(size=text_size))
 
     })
 

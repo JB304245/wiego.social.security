@@ -17,7 +17,7 @@ app_ui <- function(request) {
 
 
       shiny::column(width = 6,
-                    titlePanel("Social Security subsidy for informal workers cost calculator")),
+                    titlePanel("WIEGO's Social Security Subsidy for Informal Workers Cost Calculator")),
       shiny::column(width = 6, offset = 6,
                     tags$img(src = "www/wiego_logo_main.jpg",
                              height = "50%",
