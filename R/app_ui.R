@@ -15,13 +15,17 @@ app_ui <- function(request) {
         tags$link(rel = "stylesheet", type = "text/css", href = "www/sliders.css")
       ),
 
-
-      shiny::column(width = 6,
-                    titlePanel("WIEGO's Social Security Subsidy for Informal Workers Cost Calculator")),
-      shiny::column(width = 6, offset = 6,
-                    tags$img(src = "www/wiego_logo_main.jpg",
-                             height = "50%",
-                             width = "50%")),
+      shiny::fluidRow(
+        shiny::column(width = 3,
+                      h2("WIEGO's Social Security Subsidy for Informal Workers Cost Calculator")),
+        shiny::column(width = 5,
+                      shiny::verbatimTextOutput(outputId = "description")
+                      ),
+        shiny::column(width = 4,
+                      tags$img(src = "www/wiego_logo_main.jpg",
+                               height = "100%",
+                               width = "100%"))
+      ),
       sidebarLayout(
         sidebarPanel(
           shiny::selectInput("country", "Country", choices = DT_country_data$country,

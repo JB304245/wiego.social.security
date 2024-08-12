@@ -248,9 +248,41 @@ app_server <- function(input, output, session) {
              y = "Amount",
              x = "") +
         ggplot2::theme(axis.text.x = element_text(size=text_size),
-                       axis.text.y = element_text(size=text_size))
+                       axis.text.y = element_text(size=text_size)) +
+        guides(fill='none')
 
     })
+
+
+# Description -------------------------------------------------------------
+
+  output$description = shiny::renderText({
+
+    text = "Social security is a human right and labour right for all workers,
+    including workers in informal employment. For workers in formal wage employment,
+    the affordability of social insurance contributions and adequacy of benefits
+    is generally ensured by dividing contributions between themselves and their employer.
+    Self-employed workers, on the other hand, are often expected to shoulder the entire
+    burden of paying contributions, which results in unaffordably high contribution rates
+    or contribution payments that are too low to yield adequate benefits.
+    This is a major barrier for the nearly 80 percent of informal workers
+    in developing countries that are self-employed.
+
+    The most effective way to address this affordability gap is for governments to subsidise
+    the social insurance contributions for low-income informal workers. Global evidence
+    shows that countries that have managed to significantly expand social insurance coverage
+    to informal workers have recognised this and implemented various forms of subsidies.
+
+    This calculator helps estimate the costs of different subsidy options,
+    as well as the impacts of those on workers’ social security benefits.
+
+    For more information on WIEGO’s efforts to support the expansion of social protection
+    to all informal workers, contact Laura Alfers (laura.alfers@wiego.org) or visit:
+    https://www.wiego.org/our-work-impact/core-programmes/social-protection"
+
+    text
+
+  })
 
 
 
