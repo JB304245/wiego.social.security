@@ -62,8 +62,15 @@ app_server <- function(input, output, session) {
       workforce_participation_rate = input$percent_workforce_participation / 100
       percent_working_age = input$percent_working_age / 100
       informal_percent_current = input$percent_informal / 100
+      government_share_pct = input$ss_government_share / 100
 
+      participation_rate_initial = input$participation_rate_in_ss / 100
+      participation_rate_increase_yearly = input$participation_rate_in_ss_yearly_growth / 100
+      inflation_rate = input$inflation_rate / 100
 
+      government_expenses_pct_of_gdp = as.numeric(country_data()$government_expenses_pct_of_gdp)
+      gdp = as.numeric(country_data()$gdp)
+      current_spending = gdp * government_expenses_pct_of_gdp / 100
 
       DT_workforce = model_population_and_workforce(current_population = population,
                                                     pop_growth_current = population_growth,
@@ -71,23 +78,16 @@ app_server <- function(input, output, session) {
                                                     workforce_participation_rate = workforce_participation_rate,
                                                     informal_percent_current = informal_percent_current,
                                                     period_in_years = input$num_years)
-      gdp = as.numeric(country_data()$gdp)
-      government_expenses_pct_of_gdp = as.numeric(country_data()$government_expenses_pct_of_gdp)
-      current_spending = gdp * government_expenses_pct_of_gdp / 100
 
       DT_workforce[, government_spending := model_government_expenditure(num_years = input$num_years+1,
                                                                          initial_expenditure = current_spending,
-                                                                         inflation = input$inflation_rate / 100)]
-
-
-      participation_rate_initial = input$participation_rate_in_ss
-      participation_rate_increase_yearly = input$participation_rate_in_ss_yearly_growth
-
+                                                                         inflation = inflation_rate)]
 
       DT_workforce[, percent_informal_workers_signed_up_to_social_security := participation_rate_initial + participation_rate_increase_yearly * year]
       DT_workforce[, percent_informal_workers_signed_up_to_social_security := pmin(percent_informal_workers_signed_up_to_social_security, 1.0)]
 
-      DT_workforce[, government_share := calculate_government_share(input$ss_government_share,
+
+      DT_workforce[, government_share := calculate_government_share(government_share_pct,
                                                                     period_in_years = input$num_years,
                                                                     start_decrease_after_x_years = input$year_start_decrease)]
 
@@ -100,12 +100,7 @@ app_server <- function(input, output, session) {
                                                        government_share = government_share)]
 
       DT_workforce[, num_informal_workers_signed_up_to_social_security := workforce_informal * percent_informal_workers_signed_up_to_social_security]
-
-
-      inflation_rate = input$inflation_rate / 100
-
       DT_workforce[, inflation_factor := (1 + inflation_rate) ^ year]
-
       DT_workforce[, government_cost_usd_inflation_adjusted := government_cost_usd * inflation_factor]
       DT_workforce[, government_cost_pct_of_spending := government_cost_usd_inflation_adjusted / government_spending]
 
@@ -136,6 +131,19 @@ app_server <- function(input, output, session) {
       DT[, government_cost_usd := scales::dollar(government_cost_usd)]
       DT[, government_cost_usd_inflation_adjusted := scales::dollar(government_cost_usd_inflation_adjusted)]
 
+      data.table::setnames(DT,
+                           old = c("year", "population",
+                                   "workforce_informal",
+                                   "num_signed_up_for_ss",
+                                   "government_cost_usd",
+                                   "government_cost_usd_inflation_adjusted"),
+                           new = c("Year", "Population",
+                                   "Workforce informal",
+                                   "Signed up for social security",
+                                   "Government cost",
+                                   "Government cost inflation adjusted"),
+                           skip_absent = TRUE)
+
       DT
 
     })
@@ -143,13 +151,46 @@ app_server <- function(input, output, session) {
 
     output$country_data_table = shiny::renderTable({
 
+      old_keys = c("country",
+                   "population",
+                   "population_growth_percent",
+                   "inflation_percent",
+                   "labor_force_participation_percent",
+                   "working_age_percent",
+                   "gdp_ppp",
+                   "gdp",
+                   "governemnt_expenses_pct_of_gdp")
+
+      new_keys = c("Country",
+                   "Population",
+                   "Population Growth (%)",
+                   "Inflation (%)",
+                   "Labor force participation (%)",
+                   "Working age (%)",
+                   "GDP (PPP)",
+                   "GDP",
+                   "Governemnt expenses (% of GDP)")
+
       country_data = country_data()
 
-      df = data.frame(name = names(country_data),
-                      value = unname(unlist(country_data)))
+      country_data["population_growth_percent"] = format_number_in_list(country_data["population_growth_percent"])
+      country_data["inflation_percent"] = format_number_in_list(country_data["inflation_percent"])
+      country_data["labor_force_participation_percent"] = format_number_in_list(country_data["labor_force_participation_percent"])
+      country_data["working_age_percent"] = format_number_in_list(country_data["working_age_percent"])
+      country_data["governemnt_expenses_pct_of_gdp"] = format_number_in_list(country_data["governemnt_expenses_pct_of_gdp"])
+
+      country_data["gdp"] = format_number_in_list(country_data["gdp"], digits=0)
+      country_data["gdp_ppp"] = format_number_in_list(country_data["gdp_ppp"], digits=0)
+
+
+      available_data = country_data[old_keys]
+      available_data_names = names(available_data)
+      available_data = available_data[!is.na(available_data_names)]
+
+      df = data.frame(key = new_keys[old_keys %in% available_data_names],
+                      value = unname(unlist(available_data)))
 
       df
-
 
     })
 
@@ -158,18 +199,22 @@ app_server <- function(input, output, session) {
       DT = model_table()
 
       text_size = 15
+      legend_additional_size = 2
+      font = "Lato"
 
       DT %>%
         ggplot2::ggplot(ggplot2::aes(x = year_date, y = government_cost_usd_inflation_adjusted, group = 1)) +
         ggplot2::geom_point(col = wiego_color("orange")) +
         ggplot2::geom_line(col = wiego_color("orange")) +
         ggplot2::scale_y_continuous(labels=scales::dollar) +
-        ggplot2::scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+        ggplot2::scale_x_date(date_breaks = determine_date_breaks(nrow(DT)), date_labels = "%Y") +
         ggplot2::labs(title = "Yearly cost of subsidy",
              x = "Year",
              y = "Cost in $USD, inflation adjusted") +
-        ggplot2::theme(axis.text.x = element_text(size=text_size),
-                       axis.text.y = element_text(size=text_size))
+        ggplot2::theme(axis.text.x = element_text(size=text_size, family = font),
+                       axis.text.y = element_text(size=text_size, family = font),
+                       plot.title = element_text(face="bold", family = font,
+                                                 size=text_size+legend_additional_size))
 
 
     })
@@ -180,18 +225,22 @@ app_server <- function(input, output, session) {
       DT = model_table()
 
       text_size = 15
+      legend_additional_size = 2
+      font = "Lato"
 
       DT %>%
         ggplot2::ggplot(ggplot2::aes(x = year_date, y = government_cost_pct_of_spending, group = 1)) +
         ggplot2::geom_point(col = wiego_color("orange")) +
         ggplot2::geom_line(col = wiego_color("orange")) +
         ggplot2::scale_y_continuous(labels=scales::percent) +
-        ggplot2::scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+        ggplot2::scale_x_date(date_breaks = determine_date_breaks(nrow(DT)), date_labels = "%Y") +
         ggplot2::labs(title = "Yearly cost of subsidy as percentage of government spending",
                       x = "Year",
                       y = "Percentage of government spending") +
-        ggplot2::theme(axis.text.x = element_text(size=text_size),
-                       axis.text.y = element_text(size=text_size))
+        ggplot2::theme(axis.text.x = element_text(size=text_size, family = font),
+                       axis.text.y = element_text(size=text_size, family = font),
+                       plot.title = element_text(face="bold", family = font,
+                                                 size=text_size+legend_additional_size))
 
 
     })
@@ -203,10 +252,10 @@ app_server <- function(input, output, session) {
       total_cost = sum(DT$government_cost_usd)
       total_cost_inflation_adjusted = sum(DT$government_cost_usd_inflation_adjusted)
 
-      out_DT = data.table(comment = c('Total cost for period', 'Total cost adjusted for inflation'),
-                          amount = c(total_cost, total_cost_inflation_adjusted))
+      out_DT = data.table(` ` = c('Total cost for period', 'Total cost adjusted for inflation'),
+                          Amount = c(total_cost, total_cost_inflation_adjusted))
 
-      out_DT$amount = scales::dollar(out_DT$amount)
+      out_DT$Amount = scales::dollar(out_DT$Amount)
 
       out_DT
 
@@ -216,6 +265,8 @@ app_server <- function(input, output, session) {
     output$totals_per_worker = shiny::renderPlot({
 
       text_size = 15
+      legend_additional_size = 2
+      font = "Lato"
 
       DT = model_table()
 
@@ -238,52 +289,21 @@ app_server <- function(input, output, session) {
 
       plot_DT %>%
         ggplot2::ggplot(ggplot2::aes(x=comment, y=amount, fill = comment)) +
-        geom_col() +
-        scale_y_continuous(labels = scales::dollar) +
-        scale_x_discrete() +
+        ggplot2::geom_col() +
+        ggplot2::scale_y_continuous(labels = scales::dollar) +
+        ggplot2::scale_x_discrete() +
         scale_fill_wiego(palette = "main") +
-        coord_flip() +
-        labs(title = "Total cost per worker for the given time frame",
-             subtitle = "(number of years * 12 * monthly share)",
+        ggplot2::coord_flip() +
+        ggplot2::labs(title = "Total cost per worker for the given time frame",
+             subtitle = "Number of years * 12 * monthly share",
              y = "Amount",
              x = "") +
-        ggplot2::theme(axis.text.x = element_text(size=text_size),
-                       axis.text.y = element_text(size=text_size)) +
-        guides(fill='none')
+        ggplot2::theme(axis.text.x = element_text(size=text_size, family = font),
+                       axis.text.y = element_text(size=text_size, family = font),
+                       plot.title = element_text(face="bold", family = font,
+                                                 size=text_size+legend_additional_size)) +
+        ggplot2::guides(fill='none')
 
     })
-
-
-# Description -------------------------------------------------------------
-
-  output$description = shiny::renderText({
-
-    text = "Social security is a human right and labour right for all workers,
-    including workers in informal employment. For workers in formal wage employment,
-    the affordability of social insurance contributions and adequacy of benefits
-    is generally ensured by dividing contributions between themselves and their employer.
-    Self-employed workers, on the other hand, are often expected to shoulder the entire
-    burden of paying contributions, which results in unaffordably high contribution rates
-    or contribution payments that are too low to yield adequate benefits.
-    This is a major barrier for the nearly 80 percent of informal workers
-    in developing countries that are self-employed.
-
-    The most effective way to address this affordability gap is for governments to subsidise
-    the social insurance contributions for low-income informal workers. Global evidence
-    shows that countries that have managed to significantly expand social insurance coverage
-    to informal workers have recognised this and implemented various forms of subsidies.
-
-    This calculator helps estimate the costs of different subsidy options,
-    as well as the impacts of those on workers’ social security benefits.
-
-    For more information on WIEGO’s efforts to support the expansion of social protection
-    to all informal workers, contact Laura Alfers (laura.alfers@wiego.org) or visit:
-    https://www.wiego.org/our-work-impact/core-programmes/social-protection"
-
-    text
-
-  })
-
-
 
 }
