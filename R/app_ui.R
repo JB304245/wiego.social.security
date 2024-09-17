@@ -19,10 +19,11 @@ app_ui <- function(request) {
       shiny::fluidRow(
         shiny::column(width = 2,
                       tags$img(src = "www/wiego_logo_main.jpg",
-                               height = "100%",
-                               width = "100%")),
+                               height = "70%",
+                               width = "70%")),
         shiny::column(width = 10,
-                      h1("WIEGO's Social Security Subsidy for Informal Workers Cost Calculator"))
+                      h1("WIEGO's Social Security Subsidy"),
+                      h1("for Informal Workers Cost Calculator"))
       ),
       shiny::hr(),
       shiny::fluidRow(
