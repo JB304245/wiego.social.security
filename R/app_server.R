@@ -6,6 +6,9 @@
 #' @noRd
 app_server <- function(input, output, session) {
 
+  sysfonts::font_add_google("Lato")
+  showtext::showtext_auto()
+
 # Assemble country data ---------------------------------------------------
 
 
@@ -182,15 +185,19 @@ app_server <- function(input, output, session) {
       country_data["gdp"] = format_number_in_list(country_data["gdp"], digits=0)
       country_data["gdp_ppp"] = format_number_in_list(country_data["gdp_ppp"], digits=0)
 
+      country_data[['population']] = scales::number(country_data[['population']], big.mark = ",")
+      country_data[['gdp']] = scales::number(country_data[['gdp']], big.mark = ",")
+      country_data[['gdp_ppp']] = scales::number(country_data[['gdp_ppp']], big.mark = ",")
+
 
       available_data = country_data[old_keys]
       available_data_names = names(available_data)
       available_data = available_data[!is.na(available_data_names)]
 
-      df = data.frame(key = new_keys[old_keys %in% available_data_names],
-                      value = unname(unlist(available_data)))
+      DT = data.table::data.table(` ` = new_keys[old_keys %in% available_data_names],
+                                  Value = unname(unlist(available_data)))
 
-      df
+      DT
 
     })
 
@@ -305,5 +312,7 @@ app_server <- function(input, output, session) {
         ggplot2::guides(fill='none')
 
     })
+
+    output$world_bank_api_text = shiny::renderUI('World Bank API Information: <a href="https://documents.worldbank.org/en/publication/documents-reports/api">World Bank API</a>')
 
 }

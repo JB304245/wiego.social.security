@@ -17,11 +17,11 @@ app_ui <- function(request) {
       ),
 
       shiny::fluidRow(
-        shiny::column(width = 3,
+        shiny::column(width = 2,
                       tags$img(src = "www/wiego_logo_main.jpg",
                                height = "100%",
                                width = "100%")),
-        shiny::column(width = 9,
+        shiny::column(width = 10,
                       h1("WIEGO's Social Security Subsidy for Informal Workers Cost Calculator"))
       ),
       shiny::hr(),
@@ -41,9 +41,10 @@ app_ui <- function(request) {
       ),
       shiny::fluidRow(
         shiny::column(width=8, offset=2,
-      h5("For more information on WIEGO’s efforts to support the expansion of social protection to all informal workers, contact Florian Juergens-Grant (Florian.Juergens-Grant@WIEGO.org)."
-         )
-      )),
+                      shiny::tags$a(href="mailto: Florian.Juergens-Grant@WIEGO.org",
+                                    "For more information on WIEGO’s efforts to support the expansion of social protection to all informal workers, contact Florian Juergens-Grant (Florian.Juergens-Grant@WIEGO.org).")
+                      )
+        ),
       shiny::hr(),
       sidebarLayout(
         sidebarPanel(
@@ -55,7 +56,7 @@ app_ui <- function(request) {
                       min = 1, max = 35, value = 10, step = 1),
           shiny::numericInput("ss_min_contribution", "Monthly minimum contribution total (Worker + Government share), USD",
                       min = 1.0, max = Inf, value = 5.0, step = 0.50),
-          sliderInput("ss_government_share", "Government share (%)",
+          sliderInput("ss_government_share", "Government share of total monthly contribution (%)",
                       min = 0, max = 100, value = 50, step = 5),
           sliderInput("year_start_decrease", "Start decreasing subsidy after X years",
                       min = 0, max = 35, value = 10, step = 1),
@@ -100,8 +101,8 @@ app_ui <- function(request) {
                       shiny::dataTableOutput("model_table"),
                       shiny::h3("Comments:"),
                       shiny::h4("World Bank data retrieved via the World Bank API using the wbstats R Package."),
-                      shiny::h4("World Bank API Information: https://documents.worldbank.org/en/publication/documents-reports/api"),
-                      shiny::h4("wbstats package: https://cran.r-project.org/web/packages/wbstats/vignettes/wbstats.html"),
+                      shiny::tags$a(href="https://documents.worldbank.org/en/publication/documents-reports/api", "World Bank API Documentation"),
+                      shiny::tags$a(href="https://cran.r-project.org/web/packages/wbstats/vignettes/wbstats.html", "wbstats R Package"),
                       shiny::hr(),
                       shiny::h4("Population growth, workforce participation, inflation and so on are kept constant throughout the simulation."),
                       shiny::h4("It is assumed that informal workers will contribute the minimum and the government will match that according to the government share"),
