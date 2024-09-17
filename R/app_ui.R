@@ -21,22 +21,21 @@ app_ui <- function(request) {
                       tags$img(src = "www/wiego_logo_main.jpg",
                                height = "70%",
                                width = "70%")),
-        shiny::column(width = 10,
-                      h1("WIEGO's Social Security Subsidy"),
-                      h1("for Informal Workers Cost Calculator"))
+        shiny::column(width = 6,
+                      h1("WIEGO's Social Security Subsidy for Informal Workers Cost Calculator"))
       ),
       shiny::hr(),
       shiny::fluidRow(
-        shiny::column(width=6,
-                      shiny::h5("Social security is a human right and labour right for all workers, including workers in informal employment. For workers in formal wage employment, the affordability of social insurance contributions and adequacy of benefits is generally ensured by dividing contributions between themselves and their employer."
+        shiny::column(width=4, offset=1,
+                      shiny::h4("Social security is a human right and labour right for all workers, including workers in informal employment. For workers in formal wage employment, the affordability of social insurance contributions and adequacy of benefits is generally ensured by dividing contributions between themselves and their employer."
                                 ),
-                      shiny::h5("Self-employed workers, on the other hand, are often expected to shoulder the entire burden of paying contributions, which results in unaffordably high contribution rates or contribution payments that are too low to yield adequate benefits. This is a major barrier for the nearly 80 percent of informal workers in developing countries that are self-employed."
+                      shiny::h4("Self-employed workers, on the other hand, are often expected to shoulder the entire burden of paying contributions, which results in unaffordably high contribution rates or contribution payments that are too low to yield adequate benefits. This is a major barrier for the nearly 80 percent of informal workers in developing countries that are self-employed."
                                 )
                       ),
-        shiny::column(width=6,
-                      shiny::h5("The most effective way to address this affordability gap is for governments to subsidize social insurance contributions for low-income informal workers. Global evidence shows that countries that have managed to significantly expand social insurance coverage to informal workers have recognized this and implemented various forms of subsidies."
+        shiny::column(width=4, offset=1,
+                      shiny::h4("The most effective way to address this affordability gap is for governments to subsidize social insurance contributions for low-income informal workers. Global evidence shows that countries that have managed to significantly expand social insurance coverage to informal workers have recognized this and implemented various forms of subsidies."
                                 ),
-                      shiny::h5("This calculator helps estimate the costs of different subsidy options, as well as the impacts of those on workers’ social security benefits."
+                      shiny::h4("This calculator helps estimate the costs of different subsidy options, as well as the impacts of those on workers’ social security benefits."
                                 )
                       )
       ),
