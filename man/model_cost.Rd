@@ -8,7 +8,9 @@ model_cost(
   num_informal_workers,
   participation_rate,
   minimum_contribution_monthly_usd = 5.05,
-  government_share = 0.5
+  government_share = 0.5,
+  give_subsidy_only_to_subgroup = FALSE,
+  percent_Subgroup = 0.5
 )
 }
 \arguments{
@@ -19,6 +21,10 @@ model_cost(
 \item{minimum_contribution_monthly_usd}{total monthly minimum contribution (worker + government share)}
 
 \item{government_share}{what percentage of the minimum_contribution_monthly_usd does the government shoulder?}
+
+\item{give_subsidy_only_to_subgroup}{should the subsidy only be given to a specific subgroup of all informal workers?}
+
+\item{percent_Subgroup}{percentage of informal workers belonging to the subgroup (out of all informal workers)}
 }
 \value{
 total cost of the subsidy for the given year

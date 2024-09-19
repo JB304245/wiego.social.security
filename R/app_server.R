@@ -11,7 +11,6 @@ app_server <- function(input, output, session) {
 
 # Assemble country data ---------------------------------------------------
 
-
     country_data = shiny::reactive({
 
       out = as.list(DT_country_data[country == input$country])
@@ -21,8 +20,6 @@ app_server <- function(input, output, session) {
     })
 
 # Update inputs -----------------------------------------------------------
-
-
 
     shiny::observe({
 
@@ -75,6 +72,9 @@ app_server <- function(input, output, session) {
       gdp = as.numeric(country_data()$gdp)
       current_spending = gdp * government_expenses_pct_of_gdp / 100
 
+      give_subsidy_only_to_subgroup = input$give_subsidy_only_to_subgroup == "Yes"
+      percent_Subgroup = input$percent_Subgroup / 100
+
       DT_workforce = model_population_and_workforce(current_population = population,
                                                     pop_growth_current = population_growth,
                                                     percent_working_age = percent_working_age,
@@ -96,13 +96,19 @@ app_server <- function(input, output, session) {
 
       DT_workforce[, worker_share := 1 - government_share]
 
-
       DT_workforce[, government_cost_usd := model_cost(num_informal_workers = workforce_informal,
                                                        participation_rate = percent_informal_workers_signed_up_to_social_security,
                                                        minimum_contribution_monthly_usd = input$ss_min_contribution,
-                                                       government_share = government_share)]
+                                                       government_share = government_share,
+                                                       give_subsidy_only_to_subgroup=give_subsidy_only_to_subgroup,
+                                                       percent_Subgroup=percent_Subgroup)]
 
       DT_workforce[, num_informal_workers_signed_up_to_social_security := workforce_informal * percent_informal_workers_signed_up_to_social_security]
+
+      if(give_subsidy_only_to_subgroup) {
+        DT_workforce[, num_informal_workers_signed_up_to_social_security := num_informal_workers_signed_up_to_social_security * percent_Subgroup]
+      }
+
       DT_workforce[, inflation_factor := (1 + inflation_rate) ^ year]
       DT_workforce[, government_cost_usd_inflation_adjusted := government_cost_usd * inflation_factor]
       DT_workforce[, government_cost_pct_of_spending := government_cost_usd_inflation_adjusted / government_spending]
@@ -111,7 +117,6 @@ app_server <- function(input, output, session) {
       DT_workforce[, year_date := lubridate::as_date(paste0(year + lubridate::year(Sys.Date()), "-01-01"))]
 
       DT_workforce
-
 
     })
 
@@ -223,7 +228,6 @@ app_server <- function(input, output, session) {
                        plot.title = element_text(face="bold", family = font,
                                                  size=text_size+legend_additional_size))
 
-
     })
 
 
@@ -312,7 +316,5 @@ app_server <- function(input, output, session) {
         ggplot2::guides(fill='none')
 
     })
-
-    output$world_bank_api_text = shiny::renderUI('World Bank API Information: <a href="https://documents.worldbank.org/en/publication/documents-reports/api">World Bank API</a>')
 
 }

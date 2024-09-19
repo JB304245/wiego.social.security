@@ -5,6 +5,8 @@
 #' @param participation_rate percentage of workers who are signed up to the social security program
 #' @param minimum_contribution_monthly_usd total monthly minimum contribution (worker + government share)
 #' @param government_share what percentage of the minimum_contribution_monthly_usd does the government shoulder?
+#' @param give_subsidy_only_to_subgroup should the subsidy only be given to a specific subgroup of all informal workers?
+#' @param percent_Subgroup percentage of informal workers belonging to the subgroup (out of all informal workers)
 #'
 #' @return total cost of the subsidy for the given year
 #' @export
@@ -13,9 +15,15 @@
 model_cost = function(num_informal_workers,
                       participation_rate,
                       minimum_contribution_monthly_usd = 5.05,
-                      government_share = 0.5) {
+                      government_share = 0.5,
+                      give_subsidy_only_to_subgroup=FALSE,
+                      percent_Subgroup=0.5) {
 
   total_cost = 12 * minimum_contribution_monthly_usd * government_share * num_informal_workers * participation_rate
+
+  if(give_subsidy_only_to_subgroup) {
+    total_cost = total_cost * percent_Subgroup
+  }
 
   return(total_cost)
 
@@ -24,16 +32,6 @@ model_cost = function(num_informal_workers,
 calculate_government_share = function(government_share_initial,
                                       period_in_years,
                                       start_decrease_after_x_years) {
-
-
-  # This whole validation block doesnt work and i cant figure out why.
-
-
-#   if(!is.null(government_share_initial)) {
-#     if(government_share_initial > 0 & government_share_initial < 1) stop("government_share_initial needs to be > 0 and < 1")
-#   }
-#   if(period_in_years > 0) stop(message = "period_in_years needs to be > 0")
-#   if(start_decrease_after_x_years > 0) stop( message = "start_decrease_after_x_years needs to be > 0")
 
 
   start_decrease_after_x_years = pmin(start_decrease_after_x_years, period_in_years)

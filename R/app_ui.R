@@ -9,7 +9,7 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    fluidPage(
+    shiny::fluidPage(
 
       tags$head(
         tags$link(rel = "stylesheet", type = "text/css", href = "www/sliders.css"),
@@ -35,54 +35,58 @@ app_ui <- function(request) {
         shiny::column(width=4, offset=1,
                       shiny::h4("The most effective way to address this affordability gap is for governments to subsidize social insurance contributions for low-income informal workers. Global evidence shows that countries that have managed to significantly expand social insurance coverage to informal workers have recognized this and implemented various forms of subsidies."
                                 ),
-                      shiny::h4("This calculator helps estimate the costs of different subsidy options, as well as the impacts of those on workers’ social security benefits."
+                      shiny::h4("This calculator helps estimate the costs of different subsidy options, as well as the impacts of those on workers' social security benefits."
                                 )
                       )
       ),
       shiny::fluidRow(
         shiny::column(width=8, offset=2,
                       shiny::tags$a(href="mailto: Florian.Juergens-Grant@WIEGO.org",
-                                    "For more information on WIEGO’s efforts to support the expansion of social protection to all informal workers, contact Florian Juergens-Grant (Florian.Juergens-Grant@WIEGO.org).")
+                                    "For more information on WIEGO's efforts to support the expansion of social protection to all informal workers, contact Florian Juergens-Grant (Florian.Juergens-Grant@WIEGO.org).")
                       )
         ),
       shiny::hr(),
-      sidebarLayout(
-        sidebarPanel(
+      shiny::sidebarLayout(
+        shiny::sidebarPanel(
           shiny::selectInput("country", "Country", choices = sort(DT_country_data$country),
                              selected = "Kenya"),
           shiny::hr(),
           shiny::h4("Model control"),
-          sliderInput("num_years", "Number of years to simulate",
+          shiny::sliderInput("num_years", "Number of years to simulate",
                       min = 1, max = 35, value = 10, step = 1),
           shiny::numericInput("ss_min_contribution", "Monthly minimum contribution total (Worker + Government share), USD",
                       min = 1.0, max = Inf, value = 5.0, step = 0.50),
-          sliderInput("ss_government_share", "Government share of total monthly contribution (%)",
+          shiny::sliderInput("ss_government_share", "Government share of total monthly contribution (%)",
                       min = 0, max = 100, value = 50, step = 5),
-          sliderInput("year_start_decrease", "Start decreasing subsidy after X years",
+          shiny::sliderInput("year_start_decrease", "Start decreasing subsidy after X years",
                       min = 0, max = 35, value = 10, step = 1),
           shiny::numericInput("participation_rate_in_ss", "Percentage of informal workers who sign up for social security immediately",
                       min = 0, max = 100, value = 5, step = 1),
           shiny::numericInput("participation_rate_in_ss_yearly_growth", "Additional sign up percentage per year",
                       min = 0, max = 100, value = 1, step = 0.5),
+          shiny::radioButtons("give_subsidy_only_to_subgroup", label="Give subsidy only to a subgroup of all informal workers",
+                              choices=c("No","Yes"), selected="No"),
+          shiny::sliderInput("percent_Subgroup", "Size of subgroup (% of all informal workers)",
+                             min=0, max=100, value=50, step=1),
           # sliderInput("current_population", "Current population, million",
           #             min = 1, max = 250, value = 57),
           # sliderInput("pop_growth", "Population growth rate",
           #             min = 0, max = 0.03, value = 0.02, step = 0.0025),
           shiny::hr(),
           shiny::h4("Economic data"),
-          sliderInput("percent_working_age", "Working age (%) - populated based on World Bank data",
+          shiny::sliderInput("percent_working_age", "Working age (%) - populated based on World Bank data",
                       min = 0, max = 100, value = 60, step = 1),
-          sliderInput("percent_workforce_participation", "Workforce participation rate (%) - populated based on World Bank data",
+          shiny::sliderInput("percent_workforce_participation", "Workforce participation rate (%) - populated based on World Bank data",
                       min = 0, max = 100, value = 66, step = 1),
-          sliderInput("percent_informal", "Informal workers (%)",
+          shiny::sliderInput("percent_informal", "Informal workers (%)",
                       min = 0, max = 100, value = 80, step = 1),
-          sliderInput("inflation_rate", "Inflation rate (%) - populated based on World Bank data",
+          shiny::sliderInput("inflation_rate", "Inflation rate (%) - populated based on World Bank data",
                       min = -2, max = 50, value = 5, step = 1),
-          sliderInput("interest_rate", "Interest rate (%)",
+          shiny::sliderInput("interest_rate", "Interest rate (%)",
                       min = 0, max = 20, value = 6, step = 1),
         ),
 
-        mainPanel(
+        shiny::mainPanel(
           shiny::plotOutput('cost_plot'),
           shiny::hr(),
           shiny::plotOutput('cost_plot_pct_of_spending'),
