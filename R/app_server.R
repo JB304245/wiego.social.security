@@ -6,8 +6,15 @@
 #' @noRd
 app_server <- function(input, output, session) {
 
-  sysfonts::font_add_google("Lato")
-  showtext::showtext_auto()
+  tryCatch({
+    sysfonts::font_add_google("Lato")
+    showtext::showtext_auto()
+  },
+  error = function(e) {
+    print("An error occured while downloading the font: ")
+    print(e)
+  })
+
 
 # Assemble country data ---------------------------------------------------
 

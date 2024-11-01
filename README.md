@@ -10,8 +10,14 @@ Shiny app interface for social security subsidy cost modelling
 
 You can install the development version of wiego.social.security like so:
 
-``` r
+```r
 devtools::install_github("JB304245/wiego.social.security")
+```
+
+## Run locally
+
+```r
+devtools::load_all();run_app()
 ```
 
 ## Refresh data
